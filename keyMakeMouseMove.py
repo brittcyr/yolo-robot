@@ -18,6 +18,8 @@ def send_key(emulated_key):
     window = display.get_input_focus()._data["focus"]
     keysym = Xlib.XK.string_to_keysym(emulated_key)
     keycode = display.keysym_to_keycode(keysym)
+
+    # send the key
     event = Xlib.protocol.event.KeyPress(
         time = int(time.time()),
         root = root,
@@ -60,6 +62,7 @@ def send_key(emulated_key):
         state = shift_mask,
         detail = keycode
         )
+
     window.send_event(event, propagate = True)
     event = Xlib.protocol.event.KeyRelease(
         time = int(time.time()),
@@ -87,9 +90,12 @@ def main():
     root.grab_button(1, X.Mod1Mask, 1, X.ButtonPressMask,
                     X.GrabModeAsync, X.GrabModeAsync, X.NONE, X.NONE)
 
+    # only run for 10 seconds
     signal.signal(signal.SIGALRM, lambda a,b:sys.exit(1))
     signal.alarm(10)
+
     while 1:
+        # Handle events without blocking
         event = display.next_event()
         handle_event(event)
         display.allow_events(X.AsyncKeyboard, X.CurrentTime)
